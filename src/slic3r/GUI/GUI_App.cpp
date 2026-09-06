@@ -992,6 +992,8 @@ void GUI_App::post_init()
               // this->check_privacy_version(0);
               request_user_handle(0, cloud_provider);
             }
+
+            this->check_cert();
         });
     }
 
@@ -2078,30 +2080,27 @@ void GUI_App::init_networking_callbacks()
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__<< boost::format(": enter, m_agent=%1%")%m_agent;
     if (m_agent) {
         //set callbacks
-        m_agent->set_server_callback([](std::string url, int status) {
+        m_agent->set_server_callback([this](std::string url, int status) {
             BOOST_LOG_TRIVIAL(warning) << __FUNCTION__ << boost::format(": server_callback, url=%1%, status=%2%") % url % status;
-            //CallAfter([this]() {
-            //    if (!m_server_error_dialog) {
-            //        /*m_server_error_dialog->EndModal(wxCLOSE);
-            //        m_server_error_dialog->Destroy();
-            //        m_server_error_dialog = nullptr;*/
-            //        m_server_error_dialog = new NetworkErrorDialog(mainframe);
-            //    }
-            //
-            //    if(plater()->get_select_machine_dialog() && plater()->get_select_machine_dialog()->IsShown()){
-            //        return;
-            //    }
-            //
-            //    if (m_server_error_dialog->m_show_again) {
-            //        return;
-            //    }
-            //
-            //    if (m_server_error_dialog->IsShown()) {
-            //        return;
-            //    }
-            //
-            //    m_server_error_dialog->ShowModal();
-            //});
+            CallAfter([this]() {
+                if (!m_server_error_dialog) {
+                    m_server_error_dialog = new NetworkErrorDialog(mainframe);
+                }
+
+                if (plater() && plater()->get_select_machine_dialog() && plater()->get_select_machine_dialog()->IsShown()) {
+                    return;
+                }
+
+                if (m_server_error_dialog->m_show_again) {
+                    return;
+                }
+
+                if (m_server_error_dialog->IsShown()) {
+                    return;
+                }
+
+                m_server_error_dialog->ShowModal();
+            });
         });
 
 
@@ -5455,6 +5454,15 @@ void GUI_App::on_http_error(wxCommandEvent &evt)
         if (msg_dlg.ShowModal() == wxOK) {
         }
     }
+    else if (status == 400 && code == HttpErrorCertRevoked) {
+        if (!m_show_error_msgdlg) {
+            MessageDialog msg_dlg(nullptr, _L("Your software certificate has been revoked, please update Orca Slicer software."), "", wxAPPLY | wxOK);
+            m_show_error_msgdlg = true;
+            msg_dlg.ShowModal();
+            m_show_error_msgdlg = false;
+            return;
+        }
+    }
 
     // request login
     if (status == 401) {
@@ -6176,6 +6184,16 @@ void GUI_App::check_new_version_sf(bool show_tips, int by_user)
         });
 
     http.perform();
+}
+
+void GUI_App::check_cert()
+{
+    m_check_cert_thread = Slic3r::create_thread(
+        [this] {
+            if (m_agent)
+                m_agent->check_cert();
+        });
+    BOOST_LOG_TRIVIAL(info) << "check_cert";
 }
 
 // return true if handled

@@ -369,6 +369,9 @@ void MonitorPanel::update_all()
         return;
     }
 
+    if (m_agent)
+        m_agent->install_device_cert(obj->get_dev_id(), obj->is_lan_mode_printer());
+
     show_status(MONITOR_NORMAL);
 
     auto current_page = m_tabpanel->GetCurrentPage();

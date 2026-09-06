@@ -342,6 +342,7 @@ void MediaPlayCtrl::Play()
                 url += "&net_ver=" + v;
                 url += "&dev_ver=" + dv;
                 url += "&refresh_url=" + boost::lexical_cast<std::string>(&refresh_agora_url);
+                url += "&network_agent=" + boost::lexical_cast<std::string>(wxGetApp().getAgent() ? wxGetApp().getAgent()->get_network_agent() : nullptr);
                 url += "&cli_id=" + wxGetApp().app_config->get("slicer_uuid");
                 url += "&cli_ver=" + std::string(SLIC3R_VERSION);
             }
@@ -551,6 +552,7 @@ void MediaPlayCtrl::ToggleStream()
             url += "&net_ver=" + v;
             url += "&dev_ver=" + dv;
             url += "&refresh_url=" + boost::lexical_cast<std::string>(&refresh_agora_url);
+            url += "&network_agent=" + boost::lexical_cast<std::string>(wxGetApp().getAgent() ? wxGetApp().getAgent()->get_network_agent() : nullptr);
             url += "&cli_id=" + wxGetApp().app_config->get("slicer_uuid");
             url += "&cli_ver=" + std::string(SLIC3R_VERSION);
         }

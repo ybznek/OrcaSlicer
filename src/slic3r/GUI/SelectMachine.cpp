@@ -4669,6 +4669,8 @@ void SelectMachineDialog::update_show_status(MachineObject* obj_)
         }
     }
 
+    agent->install_device_cert(obj_->get_dev_id(), obj_->is_lan_mode_printer());
+
     /** error check **/
     /* check cloud machine connections */
     if (!obj_->is_lan_mode_printer() && !agent->is_server_connected(wxGetApp().get_printer_cloud_provider())) {
