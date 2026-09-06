@@ -27,6 +27,7 @@ static auto file_over_size_str = _u8L("The print file exceeds the maximum allowa
 static auto print_canceled_str    = _u8L("Task canceled.");
 static auto send_print_failed_str = _u8L("Failed to send the print job. Please try again.");
 static auto upload_ftp_failed_str = _u8L("Failed to upload file to ftp. Please try again.");
+static auto print_signed_str = _u8L("Your software is not signed, and some printing functions have been restricted. Please use the officially signed software version.");
 
 static auto     desc_network_error          = _u8L("Check the current status of the Bambu Lab server by clicking on the link above.");
 static auto     desc_file_too_large         = _u8L("The size of the print file is too large. Please adjust the file size and try again.");
@@ -658,6 +659,8 @@ void PrintJob::process(Ctl &ctl)
         } else if (result == BAMBU_NETWORK_ERR_CANCELED) {
             msg_text = print_canceled_str;
             ctl.update_status(0, msg_text);
+        } else if (result == BAMBU_NETWORK_SIGNED_ERROR) {
+            msg_text = print_signed_str;
         } else {
             msg_text = send_print_failed_str;
         }

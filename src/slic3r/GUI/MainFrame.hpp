@@ -254,6 +254,7 @@ public:
         eExportAllSlicedFile = 8,
         ePrintMultiMachine   = 9,
         eBambuConnectExport  = 10,
+        eSendBambuConnect    = 11
     };
 
     void update_layout();

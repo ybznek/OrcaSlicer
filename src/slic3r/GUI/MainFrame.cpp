@@ -2049,6 +2049,8 @@ wxBoxSizer* MainFrame::create_side_tools()
                 wxPostEvent(m_plater, SimpleEvent(EVT_GLTOOLBAR_SEND_TO_PRINTER));
             else if (m_print_select == eSendToPrinterAll)
                 wxPostEvent(m_plater, SimpleEvent(EVT_GLTOOLBAR_SEND_TO_PRINTER_ALL));
+            else if (m_print_select == eSendBambuConnect)
+                wxPostEvent(m_plater, SimpleEvent(EVT_GLTOOLBAR_SEND_BAMBU_CONNECT));
             /* else if (m_print_select == ePrintMultiMachine)
                  wxPostEvent(m_plater, SimpleEvent(EVT_GLTOOLBAR_PRINT_MULTI_MACHINE));*/
         });
@@ -2292,6 +2294,19 @@ wxBoxSizer* MainFrame::create_side_tools()
                     p->Dismiss();
                 });
                 p->append_button(export_gcode_btn);
+
+                SideButton *send_to_bambu_connect_btn = new SideButton(p, _L("Send to Bambu Connect"), "");
+                send_to_bambu_connect_btn->SetCornerRadius(0);
+                send_to_bambu_connect_btn->Bind(wxEVT_BUTTON, [this, p](wxCommandEvent &) {
+                    m_print_btn->SetLabel(_L("Send to BC"));
+                    m_print_select = eSendBambuConnect;
+                    m_print_enable = get_enable_print_status();
+                    m_print_btn->Enable(m_print_enable);
+                    this->Layout();
+                    fit_tab_labels(); // ORCA on label change
+                    p->Dismiss();
+                });
+                p->append_button(send_to_bambu_connect_btn);
             }
 
             p->Popup(m_print_btn);
@@ -2430,6 +2445,12 @@ bool MainFrame::get_enable_print_status()
         {
             enable = false;
         }
+    }
+    else if (m_print_select == eSendBambuConnect) {
+        if (!current_plate->is_slice_result_ready_for_print()) {
+            enable = false;
+        }
+        enable = enable && !is_all_plates;
     }
     else if (m_print_select == eExportAllSlicedFile)
     {
